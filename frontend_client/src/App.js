@@ -1,47 +1,62 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import './styles/theme.css';
+import useChat from './hooks/useChat';
+import Sidebar from './components/Sidebar';
+import ChatWindow from './components/ChatWindow';
 
+/**
+ * Main application component for AI Copilot chat interface
+ * @returns {JSX.Element} App component
+ */
 // PUBLIC_INTERFACE
 function App() {
-  const [theme, setTheme] = useState('light');
-
-  // Effect to apply theme to document element
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // PUBLIC_INTERFACE
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
+  const {
+    messages,
+    conversationId,
+    conversations,
+    isLoading,
+    error,
+    sendMessage,
+    loadConversation,
+    startNewConversation,
+    clearError,
+  } = useChat();
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app-container">
+      <Sidebar
+        conversations={conversations}
+        currentConversationId={conversationId}
+        onSelectConversation={loadConversation}
+        onNewConversation={startNewConversation}
+      />
+      
+      <div className="main-content">
+        <div className="top-bar">
+          <div className="top-bar-brand">
+            <h1>🤖 AI Copilot</h1>
+          </div>
+          <div className="top-bar-user">
+            <div className="user-icon">U</div>
+          </div>
+        </div>
+        
+        {error && (
+          <div className="error-alert">
+            <span className="error-alert-icon">⚠️</span>
+            <span className="error-alert-message">{error}</span>
+            <button className="error-alert-close" onClick={clearError}>
+              ✕
+            </button>
+          </div>
+        )}
+        
+        <ChatWindow
+          messages={messages}
+          isLoading={isLoading}
+          onSendMessage={sendMessage}
+        />
+      </div>
     </div>
   );
 }
